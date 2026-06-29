@@ -1,0 +1,15 @@
+{
+  "retrieved": 1000,
+  "ranked": 100,
+  "weights": {
+    "semantic_match": 0.4,
+    "experience_fit": 0.15,
+    "skill_relevance": 0.1,
+    "domain_relevance": 0.1,
+    "behavioral_signals": 0.1,
+    "activity": 0.05,
+    "profile_quality": 0.05,
+    "career_growth": 0.03,
+    "recruiter_engagement": 0.02
+  }
+}

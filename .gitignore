@@ -1,0 +1,30 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python caching & testing
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.pytest/
+
+# Large challenge datasets and zip files (prevents GitHub 100MB rejection)
+*.zip
+project/data/raw/
+data/raw/
+candidates.jsonl
+sample_candidates.json
+
+# Local model cache files
+project/models/candidate_embeddings.npz
+project/models/candidate_index.faiss
+project/models/candidate_index.npz
+
+# IDE settings
+.vscode/
+.idea/
+.agents/

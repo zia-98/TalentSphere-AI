@@ -1,0 +1,715 @@
+{
+  "dataset_summary": {
+    "schema_required": [
+      "candidate_id",
+      "profile",
+      "career_history",
+      "education",
+      "skills",
+      "redrob_signals"
+    ],
+    "schema_properties": [
+      "candidate_id",
+      "profile",
+      "career_history",
+      "education",
+      "skills",
+      "certifications",
+      "languages",
+      "redrob_signals"
+    ],
+    "sample_submission_header": [
+      "candidate_id",
+      "rank",
+      "score",
+      "reasoning"
+    ],
+    "docs": {
+      "readme": [
+        "Redrob Hackathon — Participant Bundle",
+        "Welcome to the Intelligent Candidate Discovery & Ranking Challenge.",
+        "What's in this bundle",
+        " ",
+        "Getting started",
+        "1. Read the docs (~30 minutes)",
+        "In this order:",
+        "1.       job_description.md — understand what role you're ranking candidates for",
+        "2.       submission_spec.md — understand the rules and evaluation pipeline",
+        "3.       redrob_signals_doc.md — understand the trap candidates and signal envelopes",
+        "4.       candidate_schema.json — understand the candidate data structure",
+        "5.       Open sample_candidates.json and skim a few candidates to see what real data looks like",
+        "2. Unpack the candidate pool",
+        "gunzip -k candidates.jsonl.gz   # -k keeps the .gz; you get both files wc -l candidates.jsonl      # should print 100000",
+        "Or load the gzipped file directly in Python:",
+        "import gzip, json with gzip.open(\"candidates.jsonl.gz\", \"rt\") as f: candidates = [json.loads(line) for line in f if line.strip()] print(len(candidates))  # 100000",
+        "3. Build your ranker",
+        "Your job: produce a CSV with the top 100 candidates for the JD, ranked best-fit first, with a 1-2 sentence reasoning for each.",
+        "The format is described in submission_spec.md Section 2-3. The compute constraints are in Section 3 (5 min, 16 GB, CPU only, no network during ranking).",
+        "4. Validate before submitting"
+      ],
+      "job_description": [
+        "Job Description: Senior AI Engineer — Founding Team",
+        "Company: Redrob AI (Series A AI-native talent intelligence platform)",
+        "Location: Pune/Noida, India (Hybrid — flexible cadence) | Open to relocation candidates from Tier-1 Indian cities",
+        "Employment Type: Full-time",
+        "Experience Required: 5–9 years (see \"what we mean by this\" below)",
+        "Let's be honest about this role",
+        "We're going to write this JD differently from most. We're a Series A company that just raised our round and we're building a new AI Engineering org from scratch. This is the kind of role where the JD changes every six months because the company changes every six months. So instead of pretending we have a fixed checklist, we're going to tell you what we actually need and what we've gotten wrong before.",
+        "If you've spent your career at Google or Meta and you want a well-scoped role with a defined ladder, this isn't it.",
+        "If you've spent your career bouncing between early-stage startups and you want to \"just code\" without having to think about product or recruiter workflows or eval frameworks, this also isn't it.",
+        "We need someone who is simultaneously comfortable with two things that sound contradictory:",
+        "Deep technical depth in modern ML systems — embeddings, retrieval, ranking, LLMs, fine-tuning.",
+        "Scrappy product-engineering attitude — willing to ship a working ranker in a week even if the underlying ML is \"obviously suboptimal,\" because we need to learn from real users before we know what to actually optimize for.",
+        "These are not contradictory in real life. They feel contradictory because of how engineering culture sorted itself into \"researcher\" vs \"shipper\" archetypes. We need both modes available in the same person, and we'd rather you tilt slightly toward shipper than toward researcher.",
+        "What you'd actually be doing",
+        "The high-level mandate: own the intelligence layer of Redrob's product. That means the ranking, retrieval, and matching systems that decide what recruiters see when they search for candidates and what candidates see when they search for roles.",
+        "In practical terms, your first 90 days will probably look like:",
+        "Weeks 1-3: Audit what we currently have (it's mostly BM25 + rule-based scoring, working but not great). Identify the 3-4 highest-leverage things to fix.",
+        "Weeks 4-8: Ship a v2 ranking system that demonstrably improves recruiter-engagement metrics. This will involve embeddings, hybrid retrieval, and probably some LLM-based re-ranking, but the architecture is your call.",
+        "Weeks 9-12: Set up the evaluation infrastructure — offline benchmarks, online A/B testing, recruiter-feedback loops — so we can keep improving without flying blind.",
+        "Beyond that, you'll be driving the long-term architecture of how we do candidate-JD matching at scale, mentoring the next round of hires (we're growing the team from 4 to 12 engineers in the next year), and working closely with our recruiter-experience PM on what to build."
+      ],
+      "signals": [
+        "Redrob Behavioral Signals — Reference",
+        "This document explains the 23 behavioral signals embedded in each candidate's redrob_signals object, how they relate to candidate quality, and how they're constructed in the synthetic dataset.",
+        "What are Redrob signals?",
+        "In a real recruiting platform, candidates generate observable behavior beyond what they list in their profile:",
+        "Do they actually respond to recruiter messages?",
+        "Have they logged in recently?",
+        "Did they complete the assessments they started?",
+        "Are recruiters saving their profile?",
+        "Have they completed previous interview cycles?",
+        "These behavioral signals are often more predictive of whether a candidate can actually be hired than their static profile. A perfect-on-paper candidate who hasn't logged in for 6 months and has a 5% response rate is, for hiring purposes, not actually available.",
+        "This dataset includes these signals so that ranking systems can incorporate them as a multiplier or modifier on top of skill-match scoring.",
+        "The 23 signals"
+      ],
+      "submission_spec": [
+        "Submission Specification — Redrob Hackathon v4",
+        "Read this carefully before submitting. Submissions that don't match this spec will be auto-rejected by the validator without scoring.",
+        "1. What you're submitting",
+        "A CSV file ranking the top 100 candidates from candidates.jsonl for the released job description.",
+        "Rank 1 is the best fit; rank 100 is the 100th best fit.",
+        "You do not rank candidates 101 onward — only the top 100.",
+        "2. File format",
+        "Filename",
+        "Your team's registered participant ID, with .csv extension. For example: team_xxx.csv.",
+        "Encoding",
+        "UTF-8.",
+        "Required columns (in this order)",
+        "candidate_id,rank,score,reasoning",
+        "Example",
+        "candidate_id,rank,score,reasoningCAND_0042871,1,0.987,\"Senior AI Engineer with 7 years building RAG systems at product companies; strong recent engagement and Bangalore-based.\"CAND_0019884,2,0.973,\"6 years applied ML; previously shipped vector search at scale; matches the 'product over research' profile in the JD.\"CAND_0091235,3,0.962,\"Strong NLP + retrieval background; some concern on notice period (120 days) but otherwise strong fit.\"...CAND_0007729,100,0.412,\"Adjacent skills only — likely below cutoff but included as final filler given experience and engagement signals.\"",
+        "3. Rules",
+        "Format",
+        "Exactly 100 rows of data (plus 1 header row).",
+        "Each rank (1 through 100) appears exactly once.",
+        "Each candidate_id appears exactly once."
+      ]
+    },
+    "tables": {
+      "signals": [
+        [
+          [
+            "#",
+            "Signal",
+            "Range / type",
+            "What it measures"
+          ],
+          [
+            "1",
+            "profile_completeness_score",
+            "0-100",
+            "How much of the profile they've filled in"
+          ],
+          [
+            "2",
+            "signup_date",
+            "date string",
+            "When they signed up on Redrob"
+          ],
+          [
+            "3",
+            "last_active_date",
+            "date string",
+            "When they last logged in"
+          ],
+          [
+            "4",
+            "open_to_work_flag",
+            "bool",
+            "Have they marked themselves available"
+          ],
+          [
+            "5",
+            "profile_views_received_30d",
+            "integer >= 0",
+            "How often their profile has been viewed by recruiters in last 30 days"
+          ],
+          [
+            "6",
+            "applications_submitted_30d",
+            "integer >= 0",
+            "How many roles they've applied to recently"
+          ],
+          [
+            "7",
+            "recruiter_response_rate",
+            "0.0-1.0",
+            "What fraction of recruiter messages they reply to"
+          ],
+          [
+            "8",
+            "avg_response_time_hours",
+            "number >= 0",
+            "Median time to respond to a recruiter message"
+          ],
+          [
+            "9",
+            "skill_assessment_scores",
+            "dict[str, 0-100]",
+            "Per-skill Redrob assessment scores"
+          ],
+          [
+            "10",
+            "connection_count",
+            "integer >= 0",
+            "Number of Redrob connections"
+          ],
+          [
+            "11",
+            "endorsements_received",
+            "integer >= 0",
+            "Total skill endorsements received"
+          ],
+          [
+            "12",
+            "notice_period_days",
+            "0-180",
+            "Their stated notice period"
+          ],
+          [
+            "13",
+            "expected_salary_range_inr_lpa.min / .max",
+            "number >= 0",
+            "Salary expectations in INR lakhs per annum"
+          ],
+          [
+            "14",
+            "preferred_work_mode",
+            "onsite/hybrid/remote/flexible",
+            "Their stated work-mode preference"
+          ],
+          [
+            "15",
+            "willing_to_relocate",
+            "bool",
+            "Will they relocate if needed"
+          ],
+          [
+            "16",
+            "github_activity_score",
+            "-1 to 100",
+            "GitHub commits/contributions score (-1 if no GitHub linked)"
+          ],
+          [
+            "17",
+            "search_appearance_30d",
+            "integer >= 0",
+            "How often they show up in recruiter searches"
+          ],
+          [
+            "18",
+            "saved_by_recruiters_30d",
+            "integer >= 0",
+            "How many recruiters bookmarked them in last 30 days"
+          ],
+          [
+            "19",
+            "interview_completion_rate",
+            "0.0-1.0",
+            "What fraction of interviews they've actually attended"
+          ],
+          [
+            "20",
+            "offer_acceptance_rate",
+            "-1 to 1.0",
+            "What fraction of offers they accepted (-1 if no prior offers)"
+          ],
+          [
+            "21",
+            "verified_email",
+            "bool",
+            "Whether their email address is verified"
+          ],
+          [
+            "22",
+            "verified_phone",
+            "bool",
+            "Whether their phone number is verified"
+          ],
+          [
+            "23",
+            "linkedin_connected",
+            "bool",
+            "Whether their LinkedIn account is connected"
+          ]
+        ]
+      ],
+      "submission_spec": [
+        [
+          [
+            "Column",
+            "Type",
+            "Required?",
+            "Description"
+          ],
+          [
+            "candidate_id",
+            "string",
+            "✅ Yes",
+            "The CAND_XXXXXXX ID from candidates.jsonl"
+          ],
+          [
+            "rank",
+            "int (1-100)",
+            "✅ Yes",
+            "The rank position. Must use each integer 1 through 100 exactly once."
+          ],
+          [
+            "score",
+            "float",
+            "✅ Yes",
+            "Your model's score for this candidate. Should be monotonically non-increasing as rank increases."
+          ],
+          [
+            "reasoning",
+            "string",
+            "⚠ Optional but strongly recommended",
+            "A 1-2 sentence justification explaining why this candidate is at this rank. Used at Stage 4 (manual review) to evaluate top submissions."
+          ]
+        ],
+        [
+          [
+            "Constraint",
+            "Limit"
+          ],
+          [
+            "Total runtime",
+            "≤ 5 minutes wall-clock"
+          ],
+          [
+            "Memory",
+            "≤ 16 GB RAM"
+          ],
+          [
+            "Compute",
+            "CPU only — no GPU during ranking"
+          ],
+          [
+            "Network",
+            "Off — your ranking code must not make external API calls (no OpenAI, Anthropic, Cohere, Gemini, or any hosted LLM service)"
+          ],
+          [
+            "Disk",
+            "≤ 5 GB intermediate state"
+          ]
+        ],
+        [
+          [
+            "Check",
+            "What we're looking for"
+          ],
+          [
+            "Specific facts",
+            "Does the reasoning reference specific facts from the candidate's profile (years of experience, current title, named skills, signal values)?"
+          ],
+          [
+            "JD connection",
+            "Does the reasoning connect to specific JD requirements, not just generic praise?"
+          ],
+          [
+            "Honest concerns",
+            "Where the candidate has obvious gaps or concerns, does the reasoning acknowledge them?"
+          ],
+          [
+            "No hallucination",
+            "Does every claim in the reasoning correspond to something actually in the candidate's profile? Skills, employers, or experience that don't exist in the profile are red flags."
+          ],
+          [
+            "Variation",
+            "Are the 10 sampled reasonings substantively different from each other (not templated)?"
+          ],
+          [
+            "Rank consistency",
+            "Does the reasoning's tone match the rank? A rank-5 candidate with critical reasoning, or a rank-95 candidate with glowing reasoning, indicates the reasoning was generated independently of the ranking."
+          ]
+        ],
+        [
+          [
+            "Metric",
+            "Weight",
+            "What it measures"
+          ],
+          [
+            "NDCG@10",
+            "0.50",
+            "Quality of your top-10 picks"
+          ],
+          [
+            "NDCG@50",
+            "0.30",
+            "Quality of your top-50 picks"
+          ],
+          [
+            "MAP (Mean Avg Precision)",
+            "0.15",
+            "Precision across all relevance levels"
+          ],
+          [
+            "P@10",
+            "0.05",
+            "Fraction of top-10 that are \"relevant\" (tier 3+)"
+          ]
+        ],
+        [
+          [
+            "Stage",
+            "What happens",
+            "What gets you eliminated"
+          ],
+          [
+            "1. Format validation",
+            "Auto-validator runs on every submission",
+            "Any spec violation in section 3"
+          ],
+          [
+            "2. Scoring",
+            "Composite computed once on the full hidden ground truth, after submissions close",
+            "Final score below cutoff for advancement to Stage 3"
+          ],
+          [
+            "3. Code reproduction + honeypot check",
+            "Top-N submissions: full code repo requested. Ranking step reproduced in sandboxed environment (5min, 16GB, no GPU, no network). Honeypot rate computed.",
+            "Cannot reproduce within compute limits; honeypot rate >10% in top 100; missing or fabricated code repo"
+          ],
+          [
+            "4. Manual review",
+            "Reasoning quality (6 checks above). Methodology coherence. Git history authenticity (real iteration vs single dump). Code quality.",
+            "Failed reasoning checks; flat git history with no iteration; codebase consists entirely of LLM API calls"
+          ],
+          [
+            "5. Defend-your-work interview",
+            "Top X finalists: 30-minute video call with Redrob engineering. Walk through architecture, defend design choices, demonstrate familiarity with your own code.",
+            "Cannot explain architecture; contradicts submitted code; clearly didn't build it"
+          ]
+        ],
+        [
+          [
+            "Field",
+            "Required?",
+            "Notes"
+          ],
+          [
+            "Team name",
+            "✅ Yes",
+            "Used in leaderboard and result announcements"
+          ],
+          [
+            "Primary contact name",
+            "✅ Yes",
+            "One person to act as your team's point of contact"
+          ],
+          [
+            "Primary contact email",
+            "✅ Yes",
+            "Used for all organizer communication"
+          ],
+          [
+            "Primary contact phone",
+            "✅ Yes",
+            "Used for top-N / top-X communication"
+          ],
+          [
+            "GitHub repository URL",
+            "✅ Yes",
+            "Must be reachable. Private repos OK if you can grant access to organizers at Stage 3. Format: https://github.com/USERNAME/REPO"
+          ],
+          [
+            "Sandbox / demo link",
+            "✅ Yes",
+            "A working hosted environment where your ranking system can be run. See Section 10.5 below."
+          ],
+          [
+            "AI tools declared",
+            "✅ Yes",
+            "Multi-select: Claude / ChatGPT / Copilot / Cursor / Gemini / Other / None. Honest declaration, not penalized."
+          ],
+          [
+            "Compute environment summary",
+            "✅ Yes",
+            "One line describing where you ran your code (e.g., \"MacBook Pro M2, 16GB RAM, Python 3.11\")"
+          ],
+          [
+            "Team member list",
+            "✅ Yes",
+            "Name + email for each member"
+          ],
+          [
+            "Methodology summary",
+            "Optional",
+            "≤200 words explaining your approach. Strongly recommended — helps at Stage 4 review."
+          ]
+        ]
+      ]
+    },
+    "inventory": [
+      {
+        "path": "candidate_schema.json",
+        "size_bytes": 8820,
+        "purpose": "Canonical candidate schema.",
+        "notes": []
+      },
+      {
+        "path": "candidates.jsonl",
+        "size_bytes": 487259903,
+        "purpose": "Primary candidate corpus.",
+        "notes": [
+          "Stream this file; it contains 100,000 candidate profiles."
+        ]
+      },
+      {
+        "path": "job_description.docx",
+        "size_bytes": 40225,
+        "purpose": "Released job description.",
+        "notes": [
+          "Extract text and tables from embedded DOCX XML."
+        ]
+      },
+      {
+        "path": "README.docx",
+        "size_bytes": 10166,
+        "purpose": "Bundle instructions.",
+        "notes": [
+          "Extract text and tables from embedded DOCX XML."
+        ]
+      },
+      {
+        "path": "redrob_signals_doc.docx",
+        "size_bytes": 37170,
+        "purpose": "Behavioral signal definitions.",
+        "notes": [
+          "Extract text and tables from embedded DOCX XML."
+        ]
+      },
+      {
+        "path": "sample_candidates.json",
+        "size_bytes": 300099,
+        "purpose": "Small sample of the candidate pool.",
+        "notes": []
+      },
+      {
+        "path": "sample_submission.csv",
+        "size_bytes": 9247,
+        "purpose": "Submission example and column order.",
+        "notes": [
+          "Use this to confirm output header ordering."
+        ]
+      },
+      {
+        "path": "submission_metadata_template.yaml",
+        "size_bytes": 5211,
+        "purpose": "Metadata template for submission.",
+        "notes": []
+      },
+      {
+        "path": "submission_spec.docx",
+        "size_bytes": 42707,
+        "purpose": "Format, scoring, and evaluation rules.",
+        "notes": [
+          "Extract text and tables from embedded DOCX XML."
+        ]
+      },
+      {
+        "path": "validate_submission.py",
+        "size_bytes": 5036,
+        "purpose": "Submission format validator.",
+        "notes": []
+      }
+    ]
+  },
+  "candidate_pool_summary": {
+    "total_candidates": 100000,
+    "unique_candidate_ids": 100000,
+    "skill_count_distribution": [
+      [
+        10,
+        14107
+      ],
+      [
+        9,
+        13512
+      ],
+      [
+        8,
+        12961
+      ],
+      [
+        7,
+        12369
+      ],
+      [
+        6,
+        11279
+      ],
+      [
+        11,
+        9091
+      ],
+      [
+        5,
+        5549
+      ],
+      [
+        12,
+        4053
+      ],
+      [
+        13,
+        3961
+      ],
+      [
+        14,
+        3573
+      ]
+    ],
+    "career_history_distribution": [
+      [
+        2,
+        24186
+      ],
+      [
+        3,
+        22126
+      ],
+      [
+        1,
+        18508
+      ],
+      [
+        4,
+        17131
+      ],
+      [
+        5,
+        11469
+      ],
+      [
+        6,
+        5196
+      ],
+      [
+        7,
+        1218
+      ],
+      [
+        8,
+        152
+      ],
+      [
+        9,
+        14
+      ]
+    ],
+    "redrob_signal_field_counts": [
+      [
+        23,
+        100000
+      ]
+    ],
+    "company_size_distribution": [
+      [
+        "10001+",
+        40464
+      ],
+      [
+        "1001-5000",
+        18201
+      ],
+      [
+        "201-500",
+        15096
+      ],
+      [
+        "51-200",
+        7727
+      ],
+      [
+        "11-50",
+        7568
+      ],
+      [
+        "501-1000",
+        7525
+      ],
+      [
+        "5001-10000",
+        3419
+      ]
+    ],
+    "industry_distribution": [
+      [
+        "IT Services",
+        29881
+      ],
+      [
+        "Software",
+        22417
+      ],
+      [
+        "Manufacturing",
+        22305
+      ],
+      [
+        "Conglomerate",
+        7571
+      ],
+      [
+        "Paper Products",
+        7467
+      ],
+      [
+        "Fintech",
+        2808
+      ],
+      [
+        "Food Delivery",
+        2514
+      ],
+      [
+        "E-commerce",
+        1529
+      ],
+      [
+        "Consulting",
+        1274
+      ],
+      [
+        "EdTech",
+        610
+      ]
+    ]
+  },
+  "data_quality_issues": {
+    "activity_date_order": 7496,
+    "salary_range_inverted": 18865
+  },
+  "recommended_features": [
+    "semantic profile summary",
+    "experience alignment",
+    "career progression",
+    "behavioral signals",
+    "activity and engagement",
+    "profile quality flags",
+    "notice period and relocation fit"
+  ]
+}

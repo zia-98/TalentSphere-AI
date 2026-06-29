@@ -1,0 +1,29 @@
+paths:
+  raw_data_dir: data/raw
+  outputs_dir: outputs
+  models_dir: models
+  processed_dir: data/processed
+
+pipeline:
+  top_k_retrieve: 1000
+  top_n_output: 100
+  random_seed: 42
+  candidate_limit: null  # Set to an integer (e.g. 1000) for fast subset testing
+
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  batch_size: 64
+  normalize_embeddings: true
+  use_fallback: false  # Set to true to use fast NumPy fallback embeddings (no deep learning)
+
+ranking:
+  weights:
+    semantic_match: 0.40
+    experience_fit: 0.15
+    skill_relevance: 0.10
+    domain_relevance: 0.10
+    behavioral_signals: 0.10
+    activity: 0.05
+    profile_quality: 0.05
+    career_growth: 0.03
+    recruiter_engagement: 0.02

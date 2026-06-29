@@ -1,0 +1,5 @@
+{
+  "candidate_source_sha256": "de7b8cae39a9f9378a2cd4f8153bfc1f84960bce0ae520f263423d129df4b335",
+  "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+  "normalize_embeddings": true
+}
